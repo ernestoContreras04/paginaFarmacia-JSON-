@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Catálogo online de Farmacia Contreras Alarcón - Medicamentos, vitaminas y productos de cuidado personal">
+    <meta name="keywords" content="farmacia, medicamentos, vitaminas, cuidado personal, salud">
+    <meta name="author" content="Farmacia Contreras Alarcón">
+    <meta name="theme-color" content="#667eea">
+    <title>Farmacia Contreras Alarcón - Catálogo Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="logo-farmacia.svg">
+</head>
+<body>
+    <!-- Banda promocional con texto que se mueve infinitamente -->
+    <div class="promo-banner">
+        <div class="promo-content">
+            <span class="promo-text">CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia || CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia || CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia |</span>
+            <span class="promo-text">| CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia || CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia || CLICK & COLLECT - Añade tus productos al carrito - Recoge en farmacia</span>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleMainMenu()" aria-label="Abrir menú principal">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button class="filters-toggle" onclick="toggleFiltersMenu()" aria-label="Abrir filtros">
+                    <i class="fas fa-filter"></i>
+                </button>
+            </div>
+            <div class="logo">
+                <img src="logo-farmacia.png" alt="Logo Farmacia" class="logo-img">
+            </div>
+            <button class="cart-icon" onclick="toggleCart()" aria-label="Abrir carrito de compras">
+                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                <span class="cart-count" id="cartCount" aria-live="polite">0</span>
+            </button>
+        </div>
+        
+        <!-- Buscador de productos -->
+        <div class="header-search">
+            <div class="container">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="headerSearchInput" 
+                        placeholder="Buscar productos..." 
+                        onkeyup="filterProducts()"
+                        aria-label="Buscar productos por nombre o descripción"
+                        class="header-search-input"
+                    >
+                    <button class="header-search-btn" onclick="filterProducts()" aria-label="Buscar productos">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="catalog" aria-labelledby="catalog-title">
+            <div class="container">
+                <h2 id="catalog-title">Catálogo de Productos</h2>
+                
+                <div class="products-grid" id="productsGrid" role="grid" aria-label="Lista de productos">
+                    <!-- Los productos se cargarán dinámicamente -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Menú lateral de navegación principal -->
+    <aside class="main-menu-sidebar" id="mainMenuSidebar" aria-label="Menú principal" aria-hidden="true">
+        <div class="main-menu-header">
+            <h3>Menú</h3>
+            <button class="close-main-menu" onclick="toggleMainMenu()" aria-label="Cerrar menú principal">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        
+        <div class="main-menu-content">
+            <div class="menu-item">
+                <div class="menu-item-content">
+                    <div class="menu-icon rewards-icon">
+                        <i class="fas fa-medal" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Galileo Farma Rewards</span>
+                </div>
+            </div>
+            
+            <div class="menu-item">
+                <div class="menu-item-content">
+                    <div class="menu-icon gift-icon">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Añade un regalo a tu pedido</span>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon facial-icon">
+                        <i class="fas fa-pump-soap" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Facial</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Facial">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon corporal-icon">
+                        <i class="fas fa-spa" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Corporal</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Corporal">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon sun-icon">
+                        <i class="fas fa-sun" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Protectores Solares</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Protectores Solares">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon nutricosmetic-icon">
+                        <i class="fas fa-pills" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Nutricosmética</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Nutricosmética">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon hair-icon">
+                        <i class="fas fa-cut" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Cabello</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Cabello">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon tech-icon">
+                        <i class="fas fa-magic" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Tecnobelleza</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Tecnobelleza">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="menu-item expandable">
+                <div class="menu-item-content">
+                    <div class="menu-icon nutrition-icon">
+                        <i class="fas fa-apple-alt" aria-hidden="true"></i>
+                    </div>
+                    <span class="menu-text">Nutrición</span>
+                    <button class="expand-btn" onclick="toggleSubmenu(this)" aria-label="Expandir submenú Nutrición">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Overlay para el menú principal -->
+    <div class="main-menu-overlay" id="mainMenuOverlay" onclick="toggleMainMenu()" aria-hidden="true"></div>
+
+    <!-- Menú lateral de filtros -->
+    <aside class="filters-sidebar" id="filtersSidebar" aria-label="Filtros de productos" aria-hidden="true">
+        <div class="filters-header">
+            <h3><i class="fas fa-filter" aria-hidden="true"></i> Filtros</h3>
+            <button class="close-filters" onclick="toggleFiltersMenu()" aria-label="Cerrar filtros">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        
+        <div class="filters-content" role="search">
+            <div class="filter-group">
+                <label for="searchInput" class="filter-label">Buscar productos</label>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar productos..." 
+                    onkeyup="filterProducts()"
+                    aria-label="Buscar productos por nombre o descripción"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label for="categoryFilter" class="filter-label">Categoría</label>
+                <select 
+                    id="categoryFilter" 
+                    onchange="filterProducts()"
+                    aria-label="Seleccionar categoría de productos"
+                >
+                    <option value="">Todas las categorías</option>
+                    <option value="medicamentos">Medicamentos</option>
+                    <option value="cuidado-personal">Cuidado Personal</option>
+                    <option value="vitaminas">Vitaminas</option>
+                    <option value="dermatologia">Dermatología</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Ordenar por</label>
+                <select id="sortFilter" onchange="filterProducts()" aria-label="Ordenar productos">
+                    <option value="">Sin ordenar</option>
+                    <option value="name-asc">Nombre A-Z</option>
+                    <option value="name-desc">Nombre Z-A</option>
+                    <option value="price-asc">Precio menor a mayor</option>
+                    <option value="price-desc">Precio mayor a menor</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Rango de precios</label>
+                <div class="price-range">
+                    <input type="range" id="priceRange" min="0" max="50" value="50" oninput="updatePriceRange()" aria-label="Rango de precios">
+                    <span id="priceValue">€0 - €50</span>
+                </div>
+            </div>
+            
+            <button class="btn-clear-filters" onclick="clearFilters()" aria-label="Limpiar filtros">
+                <i class="fas fa-undo" aria-hidden="true"></i> Limpiar Filtros
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay para el menú de filtros -->
+    <div class="filters-overlay" id="filtersOverlay" onclick="toggleFiltersMenu()" aria-hidden="true"></div>
+
+    <!-- Carrito lateral -->
+    <aside class="cart-sidebar" id="cartSidebar" aria-label="Carrito de compras" aria-hidden="true">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart" aria-hidden="true"></i> Carrito de Compras</h3>
+            <button class="close-cart" onclick="toggleCart()" aria-label="Cerrar carrito">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        
+        <div class="cart-items" id="cartItems" role="region" aria-label="Productos en el carrito">
+            <!-- Los items del carrito se mostrarán aquí -->
+        </div>
+        
+        <div class="cart-footer">
+            <div class="cart-total" role="status" aria-live="polite">
+                <strong>Total: <span id="cartTotal">0.00</span></strong>
+            </div>
+            <button class="btn-whatsapp" onclick="sendToWhatsApp()" aria-label="Enviar pedido por WhatsApp">
+                <i class="fab fa-whatsapp" aria-hidden="true"></i> Enviar por WhatsApp
+            </button>
+            <button class="btn-clear" onclick="clearCart()" aria-label="Vaciar carrito de compras">
+                <i class="fas fa-trash" aria-hidden="true"></i> Vaciar Carrito
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay para el carrito -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Farmacia Contreras Alarcón</h4>
+                    <p>Tu farmacia de confianza</p>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> C. de Sta. Cruz de Marcenado, 30, Centro, 28015 Madrid</p>
+                    </address>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-phone" aria-hidden="true"></i> <a href="tel:+34636363611">+34 636 363 611</a></p>
+                    <p><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:farmaciacontrerasalarcon@gmail.com">farmaciacontrerasalarcon@gmail.com</a></p>
+                    <p><i class="fab fa-whatsapp" aria-hidden="true"></i> <a href="https://wa.me/34636363611" target="_blank" rel="noopener">WhatsApp</a></p>
+                </div>
+                <div class="footer-section">
+                    <h4>Horarios</h4>
+                    <p>Lun-Vie: 9:00 - 21:00</p>
+                    <p>Sáb: 9:30 - 14:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Farmacia Contreras Alarcón. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón flotante para volver arriba -->
+    <button id="backToTop" class="back-to-top" aria-label="Volver arriba" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+
+    <script src="config.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuración de Firebase -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Script principal -->
+    <script src="script.js"></script>
+    
+    <!-- Script de migración de productos -->
+    <script src="migrate-products.js"></script>
+</body>
+</html>

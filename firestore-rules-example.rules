@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir lectura pública de productos
+    match /productos/{productId} {
+      allow read: if true;  // Cualquiera puede leer productos
+      allow write: if false; // Solo administradores pueden escribir (configurar autenticación)
+    }
+    
+    // Permitir lectura de otras colecciones públicas si las hay
+    match /{document=**} {
+      allow read: if true;  // Lectura pública general
+      allow write: if false; // Sin escritura pública
+    }
+  }
+}

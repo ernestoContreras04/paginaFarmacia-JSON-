@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Firebase - Farmacia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .danger {
+            background-color: #dc3545;
+        }
+        .danger:hover {
+            background-color: #c82333;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Prueba de Firebase - Farmacia</h1>
+        <p>Esta página te permite probar la conexión con Firebase y cargar productos de ejemplo.</p>
+        
+        <div id="status" class="status info">
+            Inicializando Firebase...
+        </div>
+        
+        <div class="actions">
+            <h3>Acciones disponibles:</h3>
+            <button onclick="testConnection()">🔍 Probar Conexión</button>
+            <button onclick="migrateProducts()">📦 Cargar Productos de Ejemplo</button>
+            <button onclick="listProducts()">📋 Listar Productos</button>
+            <button onclick="clearAllProducts()" class="danger">🗑️ Limpiar Todos los Productos</button>
+        </div>
+        
+        <div id="results">
+            <h3>Resultados:</h3>
+            <pre id="output">Los resultados aparecerán aquí...</pre>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuración de Firebase -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        let productsCollection;
+        let db;
+        
+        // Función para mostrar estado
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        // Función para mostrar resultados
+        function showOutput(message) {
+            const output = document.getElementById('output');
+            output.textContent = message;
+        }
+        
+        // Función para probar conexión
+        async function testConnection() {
+            try {
+                showStatus('Probando conexión con Firebase...', 'info');
+                
+                if (!productsCollection) {
+                    throw new Error('productsCollection no está disponible');
+                }
+                
+                const snapshot = await productsCollection.limit(1).get();
+                
+                showStatus('✅ Conexión exitosa con Firebase', 'success');
+                showOutput(`Conexión exitosa!\nDocumentos en la colección: ${snapshot.size}\nTimestamp: ${new Date().toLocaleString()}`);
+                
+            } catch (error) {
+                showStatus('❌ Error de conexión con Firebase', 'error');
+                showOutput(`Error: ${error.message}\n\nStack: ${error.stack}`);
+            }
+        }
+        
+        // Función para migrar productos
+        async function migrateProducts() {
+            try {
+                showStatus('Migrando productos...', 'info');
+                
+                if (!productsCollection) {
+                    throw new Error('productsCollection no está disponible');
+                }
+                
+                const sampleProducts = [
+                    {
+                        name: "Paracetamol 500mg",
+                        description: "Analgésico y antipirético para aliviar el dolor y reducir la fiebre",
+                        price: 5.99,
+                        category: "medicamentos",
+                        brand: "Genérico",
+                        image: "💊",
+                        type: "analgésico",
+                        stock: 100,
+                        active: true,
+                        createdAt: new Date()
+                    },
+                    {
+                        name: "Vitamina C 1000mg",
+                        description: "Suplemento vitamínico para fortalecer el sistema inmunológico",
+                        price: 12.99,
+                        category: "vitaminas",
+                        brand: "Solgar",
+                        image: "🍊",
+                        type: "vitamina",
+                        stock: 120,
+                        active: true,
+                        createdAt: new Date()
+                    }
+                ];
+                
+                for (const product of sampleProducts) {
+                    await productsCollection.add(product);
+                }
+                
+                showStatus('✅ Productos migrados exitosamente', 'success');
+                showOutput(`Migración completada!\nProductos migrados: ${sampleProducts.length}\nTimestamp: ${new Date().toLocaleString()}`);
+                
+            } catch (error) {
+                showStatus('❌ Error durante la migración', 'error');
+                showOutput(`Error: ${error.message}\n\nStack: ${error.stack}`);
+            }
+        }
+        
+        // Función para listar productos
+        async function listProducts() {
+            try {
+                showStatus('Listando productos...', 'info');
+                
+                if (!productsCollection) {
+                    throw new Error('productsCollection no está disponible');
+                }
+                
+                const snapshot = await productsCollection.get();
+                const products = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                showStatus(`📋 Productos encontrados: ${products.length}`, 'success');
+                showOutput(`Productos en la base de datos:\n\n${JSON.stringify(products, null, 2)}`);
+                
+            } catch (error) {
+                showStatus('❌ Error al listar productos', 'error');
+                showOutput(`Error: ${error.message}\n\nStack: ${error.stack}`);
+            }
+        }
+        
+        // Función para limpiar productos
+        async function clearAllProducts() {
+            if (!confirm('¿Estás seguro de que quieres eliminar TODOS los productos? Esta acción no se puede deshacer.')) {
+                return;
+            }
+            
+            try {
+                showStatus('Limpiando productos...', 'info');
+                
+                if (!productsCollection) {
+                    throw new Error('productsCollection no está disponible');
+                }
+                
+                const snapshot = await productsCollection.get();
+                const batch = db.batch();
+                
+                snapshot.docs.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                
+                showStatus('✅ Todos los productos han sido eliminados', 'success');
+                showOutput(`Limpieza completada!\nProductos eliminados: ${snapshot.size}\nTimestamp: ${new Date().toLocaleString()}`);
+                
+            } catch (error) {
+                showStatus('❌ Error al limpiar productos', 'error');
+                showOutput(`Error: ${error.message}\n\nStack: ${error.stack}`);
+            }
+        }
+        
+        // Inicializar cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar que Firebase esté disponible
+            if (typeof firebase === 'undefined') {
+                showStatus('❌ Firebase no está disponible', 'error');
+                showOutput('Error: Firebase no se ha cargado correctamente. Verifica la conexión a internet y los scripts.');
+                return;
+            }
+            
+            // Verificar que la configuración esté disponible
+            if (typeof productsCollection === 'undefined') {
+                showStatus('❌ Configuración de Firebase incompleta', 'error');
+                showOutput('Error: La configuración de Firebase no se ha cargado correctamente. Verifica firebase-config.js');
+                return;
+            }
+            
+            showStatus('✅ Firebase inicializado correctamente', 'success');
+            showOutput('Firebase está listo para usar.\n\nProyecto: farmacia-9737f\n\nUsa los botones de arriba para probar las funcionalidades.');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Conexión Firebase</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔌 Test de Conexión Firebase</h1>
+    
+    <div id="status" class="status info">Inicializando...</div>
+    <div id="output"></div>
+    
+    <button onclick="testConnection()">🔄 Probar Conexión</button>
+    <button onclick="testRead()">📖 Probar Lectura</button>
+    
+    <script>
+        // Firebase SDK
+        const firebaseConfig = {
+            apiKey: "AIzaSyDnGAwyCaGqSxhDX8woS9nbR-1kGc5D360",
+            authDomain: "farmacia-9737f.firebaseapp.com",
+            projectId: "farmacia-9737f",
+            storageBucket: "farmacia-9737f.firebasestorage.app",
+            messagingSenderId: "265524327894",
+            appId: "1:265524327894:web:2b8f935db21ddf24362077",
+            measurementId: "G-T5V39CTSDF"
+        };
+        
+        let app, db, productsCollection;
+        
+        function showStatus(message, type = 'info') {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').className = `status ${type}`;
+        }
+        
+        function showOutput(message) {
+            document.getElementById('output').innerHTML = `<pre>${message}</pre>`;
+        }
+        
+        async function testConnection() {
+            try {
+                showStatus('Probando conexión...', 'info');
+                
+                // Inicializar Firebase
+                if (!app) {
+                    app = firebase.initializeApp(firebaseConfig);
+                }
+                
+                // Obtener Firestore
+                if (!db) {
+                    db = firebase.firestore(app);
+                }
+                
+                // Obtener colección
+                if (!productsCollection) {
+                    productsCollection = db.collection('products');
+                }
+                
+                showStatus('✅ Firebase inicializado correctamente', 'success');
+                showOutput(`Firebase App: ${app.name}\nFirestore: ${db ? 'Disponible' : 'No disponible'}\nColección: ${productsCollection ? 'Disponible' : 'No disponible'}`);
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+                showOutput(`Error completo:\n${error.stack}`);
+            }
+        }
+        
+        async function testRead() {
+            try {
+                if (!productsCollection) {
+                    showStatus('❌ Primero inicializa Firebase', 'error');
+                    return;
+                }
+                
+                showStatus('Leyendo productos...', 'info');
+                
+                const snapshot = await productsCollection.get();
+                const products = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                showStatus(`✅ Productos leídos: ${products.length}`, 'success');
+                showOutput(`Productos encontrados:\n\n${JSON.stringify(products, null, 2)}`);
+                
+            } catch (error) {
+                showStatus(`❌ Error al leer: ${error.message}`, 'error');
+                showOutput(`Error completo:\n${error.stack}`);
+            }
+        }
+        
+        // Cargar Firebase SDKs
+        async function loadFirebase() {
+            try {
+                // Cargar Firebase App
+                const appScript = document.createElement('script');
+                appScript.src = 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app-compat.js';
+                appScript.onload = () => {
+                    // Cargar Firestore
+                    const firestoreScript = document.createElement('script');
+                    firestoreScript.src = 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore-compat.js';
+                    firestoreScript.onload = () => {
+                        showStatus('✅ SDKs de Firebase cargados', 'success');
+                        testConnection();
+                    };
+                    firestoreScript.onerror = () => {
+                        showStatus('❌ Error al cargar Firestore', 'error');
+                    };
+                    document.head.appendChild(firestoreScript);
+                };
+                appScript.onerror = () => {
+                    showStatus('❌ Error al cargar Firebase App', 'error');
+                };
+                document.head.appendChild(appScript);
+                
+            } catch (error) {
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Inicializar cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', loadFirebase);
+    </script>
+</body>
+</html>
