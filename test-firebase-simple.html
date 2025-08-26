@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Simple</title>
+</head>
+<body>
+    <h1>Test Firebase Simple</h1>
+    <div id="status">Estado: Inicializando...</div>
+    <div id="products">Productos: Esperando...</div>
+    <div id="console"></div>
+
+    <!-- Firebase SDK v9+ (modular) -->
+    <script type="module">
+        // Importar Firebase v9+ (modular)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Hacer Firebase disponible globalmente
+        window.Firebase = { initializeApp, getFirestore, collection, getDocs };
+        
+        console.log('✅ Firebase importado correctamente');
+        document.getElementById('status').textContent = 'Estado: Firebase importado';
+    </script>
+    
+    <!-- Configuración de Firebase -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Función para probar Firebase
+        async function testFirebase() {
+            try {
+                console.log('🔄 Probando Firebase...');
+                document.getElementById('status').textContent = 'Estado: Probando Firebase...';
+                
+                // Esperar a que Firebase esté disponible
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                while (!window.productsCollection && attempts < maxAttempts) {
+                    console.log(`🔄 Esperando Firebase... (${attempts + 1}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (window.productsCollection) {
+                    console.log('✅ Firebase disponible');
+                    document.getElementById('status').textContent = 'Estado: Firebase disponible';
+                    
+                    // Intentar cargar productos
+                    console.log('🔄 Cargando productos...');
+                    const { getDocs } = window.Firebase;
+                    const snapshot = await getDocs(window.productsCollection);
+                    
+                    const products = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            name: data.Nombre || data.name || 'Sin nombre',
+                            price: data.Precio || data.price || 0
+                        };
+                    });
+                    
+                    console.log(`✅ Productos cargados: ${products.length}`);
+                    document.getElementById('products').textContent = `Productos: ${products.length} encontrados`;
+                    
+                    if (products.length > 0) {
+                        products.forEach(product => {
+                            console.log(`- ${product.name}: €${product.price}`);
+                        });
+                    }
+                    
+                } else {
+                    throw new Error('Firebase no disponible después de 5 segundos');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('status').textContent = `Estado: Error - ${error.message}`;
+                document.getElementById('products').textContent = 'Productos: Error al cargar';
+            }
+        }
+        
+        // Ejecutar test cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 Página cargada, iniciando test...');
+            setTimeout(testFirebase, 1000); // Esperar 1 segundo para que Firebase se inicialice
+        });
+        
+        // Función para mostrar logs en la página
+        function log(message) {
+            const consoleDiv = document.getElementById('console');
+            const logLine = document.createElement('div');
+            logLine.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(logLine);
+        }
+        
+        // Interceptar console.log para mostrar en la página
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log(args.join(' '));
+        };
+        
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            log('❌ ERROR: ' + args.join(' '));
+        };
+    </script>
+</body>
+</html>

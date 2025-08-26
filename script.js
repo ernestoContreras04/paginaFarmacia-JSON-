@@ -1,7 +1,4 @@
-// Importar Firebase
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+// Firebase v9+ (modular) - se importa desde el HTML
 
 // Array de productos (se cargará desde Firebase)
 let products = [];
@@ -9,16 +6,17 @@ let products = [];
 // Función para cargar productos desde Firebase
 async function loadProductsFromFirebase() {
     try {
-        console.log('🔄 Intentando cargar productos desde Firebase...');
+        console.log('🔄 Cargando productos desde Firebase...');
         
         // Verificar que Firebase esté disponible
         if (!window.productsCollection) {
             throw new Error('Firebase no está disponible');
         }
         
-        // Importar getDocs para Firebase v9+
-        const { getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-        const snapshot = await getDocs(productsCollection);
+        // Usar Firebase v9+ (modular)
+        const { getDocs } = window.Firebase;
+        const snapshot = await getDocs(window.productsCollection);
+        
         products = snapshot.docs.map(doc => {
             const data = doc.data();
             return {
@@ -104,20 +102,34 @@ let filtersSidebar, filtersOverlay, backToTopBtn;
 
 // Función para esperar a que Firebase esté disponible
 async function waitForFirebase() {
-    let attempts = 0;
-    const maxAttempts = 50; // 5 segundos máximo
-    
-    while (!window.productsCollection && attempts < maxAttempts) {
-        console.log(`🔄 Esperando a que Firebase esté disponible... (intento ${attempts + 1}/${maxAttempts})`);
-        await new Promise(resolve => setTimeout(resolve, 100)); // Esperar 100ms
-        attempts++;
-    }
-    
-    if (window.productsCollection) {
-        console.log('✅ Firebase está disponible, cargando productos...');
-        await loadProductsFromFirebase();
-    } else {
-        console.error('❌ Firebase no está disponible después de 5 segundos');
+    try {
+        console.log('🔄 Esperando a que Firebase esté disponible...');
+        
+        // Usar la función de espera de Firebase
+        if (window.waitForFirebaseReady) {
+            await window.waitForFirebaseReady();
+            console.log('✅ Firebase está disponible, cargando productos...');
+            await loadProductsFromFirebase();
+        } else {
+            // Fallback: esperar manualmente
+            let attempts = 0;
+            const maxAttempts = 100; // 10 segundos máximo
+            
+            while (!window.productsCollection && attempts < maxAttempts) {
+                console.log(`🔄 Esperando Firebase... (${attempts + 1}/${maxAttempts})`);
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (window.productsCollection) {
+                console.log('✅ Firebase disponible, cargando productos...');
+                await loadProductsFromFirebase();
+            } else {
+                throw new Error('Firebase no disponible después de 10 segundos');
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error esperando Firebase:', error);
         loadExampleProducts();
     }
 }

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Final - 100% Funcional</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .console { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Firebase Final - 100% Funcional</h1>
+    
+    <div id="status" class="status info">Estado: Inicializando...</div>
+    
+    <div>
+        <button class="btn-primary" onclick="testFirebase()">🔄 Probar Firebase</button>
+        <button class="btn-success" onclick="loadProducts()">📦 Cargar Productos</button>
+        <button class="btn-danger" onclick="clearConsole()">🗑️ Limpiar Consola</button>
+    </div>
+    
+    <div id="products" class="status info">Productos: Esperando...</div>
+    
+    <h3>📊 Consola de Logs:</h3>
+    <div id="console" class="console"></div>
+
+    <!-- Firebase SDK v9+ (modular) -->
+    <script type="module">
+        console.log('🔄 Importando Firebase v9+ (modular)...');
+        
+        try {
+            // Importar Firebase v9+ (modular)
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+            const { getFirestore, collection, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+            
+            // Hacer Firebase disponible globalmente
+            window.Firebase = { initializeApp, getFirestore, collection, getDocs };
+            
+            console.log('✅ Firebase importado correctamente');
+            document.getElementById('status').textContent = 'Estado: Firebase importado correctamente';
+            document.getElementById('status').className = 'status success';
+            
+        } catch (error) {
+            console.error('❌ Error importando Firebase:', error);
+            document.getElementById('status').textContent = `Estado: Error importando Firebase - ${error.message}`;
+            document.getElementById('status').className = 'status error';
+        }
+    </script>
+    
+    <!-- Configuración de Firebase -->
+    <script src="firebase-config.js"></script>
+    
+    <script>
+        // Variables globales
+        let firebaseReady = false;
+        let productsLoaded = false;
+        
+        // Función para probar Firebase
+        async function testFirebase() {
+            try {
+                console.log('🔄 Probando Firebase...');
+                document.getElementById('status').textContent = 'Estado: Probando Firebase...';
+                document.getElementById('status').className = 'status info';
+                
+                // Verificar que Firebase esté disponible
+                if (!window.Firebase) {
+                    throw new Error('Firebase no está disponible');
+                }
+                
+                console.log('✅ Firebase disponible en window.Firebase');
+                
+                // Esperar a que Firebase esté inicializado
+                if (window.waitForFirebaseReady) {
+                    console.log('🔄 Esperando a que Firebase esté listo...');
+                    await window.waitForFirebaseReady();
+                    console.log('✅ Firebase está listo');
+                    firebaseReady = true;
+                } else {
+                    throw new Error('Función waitForFirebaseReady no disponible');
+                }
+                
+                document.getElementById('status').textContent = 'Estado: Firebase funcionando correctamente';
+                document.getElementById('status').className = 'status success';
+                
+                console.log('✅ Test de Firebase completado exitosamente');
+                
+            } catch (error) {
+                console.error('❌ Error en test de Firebase:', error);
+                document.getElementById('status').textContent = `Estado: Error - ${error.message}`;
+                document.getElementById('status').className = 'status error';
+            }
+        }
+        
+        // Función para cargar productos
+        async function loadProducts() {
+            try {
+                if (!firebaseReady) {
+                    throw new Error('Firebase no está listo. Ejecuta "Probar Firebase" primero.');
+                }
+                
+                console.log('🔄 Cargando productos...');
+                document.getElementById('products').textContent = 'Productos: Cargando...';
+                document.getElementById('products').className = 'status info';
+                
+                // Verificar que la colección esté disponible
+                if (!window.productsCollection) {
+                    throw new Error('Colección de productos no disponible');
+                }
+                
+                console.log('✅ Colección de productos disponible');
+                
+                // Cargar productos usando Firebase v9+
+                const { getDocs } = window.Firebase;
+                const snapshot = await getDocs(window.productsCollection);
+                
+                const products = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        name: data.Nombre || data.name || 'Sin nombre',
+                        description: data.Descripcion || data.description || 'Sin descripción',
+                        price: data.Precio || data.price || 0,
+                        category: data.Tipo || data.category || 'Sin categoría',
+                        brand: data.Marca || data.brand || 'Sin marca'
+                    };
+                });
+                
+                console.log(`✅ Productos cargados exitosamente: ${products.length}`);
+                document.getElementById('products').textContent = `Productos: ${products.length} encontrados`;
+                document.getElementById('products').className = 'status success';
+                
+                if (products.length > 0) {
+                    console.log('📦 Lista de productos:');
+                    products.forEach((product, index) => {
+                        console.log(`${index + 1}. ${product.name} - €${product.price} (${product.category})`);
+                    });
+                } else {
+                    console.log('⚠️ No se encontraron productos en la base de datos');
+                }
+                
+                productsLoaded = true;
+                
+            } catch (error) {
+                console.error('❌ Error cargando productos:', error);
+                document.getElementById('products').textContent = `Productos: Error - ${error.message}`;
+                document.getElementById('products').className = 'status error';
+            }
+        }
+        
+        // Función para limpiar consola
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '';
+            console.log('🗑️ Consola limpiada');
+        }
+        
+        // Función para mostrar logs en la página
+        function log(message) {
+            const consoleDiv = document.getElementById('console');
+            const logLine = document.createElement('div');
+            logLine.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(logLine);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        // Interceptar console.log para mostrar en la página
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log(args.join(' '));
+        };
+        
+        const originalError = console.error;
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            log('❌ ERROR: ' + args.join(' '));
+        };
+        
+        // Inicializar cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 Página cargada, sistema listo');
+            document.getElementById('status').textContent = 'Estado: Sistema listo - Ejecuta "Probar Firebase"';
+            document.getElementById('status').className = 'status info';
+        });
+    </script>
+</body>
+</html>
