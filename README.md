@@ -53,26 +53,50 @@ paginaFarmacia/
 ├── index.html          # Página principal
 ├── styles.css          # Estilos CSS responsive
 ├── script.js           # Funcionalidad JavaScript
-├── config.js           # Configuración de la farmacia
+├── products.json       # Datos de productos en formato JSON
 ├── logo-farmacia.svg   # Logo SVG personalizado
+├── logo-farmacia.png  # Logo PNG para compatibilidad
+├── fotosCatalogo/      # Carpeta con imágenes de productos
 └── README.md           # Este archivo
 ```
 
 ## ⚙️ Configuración
 
 ### Personalizar Información de la Farmacia
-Edita `config.js` para cambiar:
+Edita `index.html` para cambiar:
 - Nombre de la farmacia
 - Número de teléfono
 - Email y dirección
 - Horarios de atención
 
 ### Personalizar Productos
-Modifica el array `products` en `script.js` para:
+Modifica el archivo `products.json` para:
 - Añadir nuevos productos
 - Cambiar precios y descripciones
 - Modificar categorías
-- Personalizar iconos
+- Personalizar imágenes
+
+### Estructura del JSON de Productos
+```json
+{
+  "metadata": {
+    "fecha_generacion": "2025-09-04T00:04:36.661Z",
+    "total_productos": 3,
+    "fuente": "Firestore - Farmacia",
+    "version": "1.0"
+  },
+  "productos": [
+    {
+      "nombre": "Nombre del Producto",
+      "descripcion": "Descripción del producto",
+      "precio": 19.99,
+      "categoria": "Cuidado Personal",
+      "marca": "Marca del Producto",
+      "imagen": "https://firebasestorage.googleapis.com/v0/b/..."
+    }
+  ]
+}
+```
 
 ## 🎨 Personalización
 
@@ -120,6 +144,7 @@ La página usa la fuente del sistema por defecto, pero puedes cambiar a Google F
 - Gestión de estado del carrito
 - Notificaciones dinámicas
 - Persistencia de datos
+- Carga de datos desde JSON
 
 ### CSS
 - Grid y Flexbox modernos
@@ -201,6 +226,7 @@ Para dudas o sugerencias:
 - Revisa la documentación
 - Verifica la consola del navegador
 - Asegúrate de que todos los archivos estén presentes
+- Verifica que el archivo `products.json` esté bien formateado
 
 ---
 

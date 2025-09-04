@@ -1,34 +1,37 @@
-// Firebase v9+ (modular) - se importa desde el HTML
-
-// Array de productos (se cargará desde Firebase)
+// Array de productos (se cargará desde JSON)
 let products = [];
 
-// Función para cargar productos desde Firebase
-async function loadProductsFromFirebase() {
+// Carrito de compras
+let cart = [];
+
+// Elementos del DOM (se inicializarán cuando se cargue la página)
+let productsGrid, cartSidebar, cartOverlay, cartItems, cartCount, cartTotal;
+let searchInput, categoryFilter, sortFilter, priceRange, priceValue;
+let filtersSidebar, filtersOverlay, backToTopBtn;
+
+// Función para cargar productos desde JSON
+async function loadProductsFromJSON() {
     try {
-        console.log('🔄 Cargando productos desde Firebase...');
+        console.log('🔄 Cargando productos desde JSON...');
         
-        // Verificar que Firebase esté disponible
-        if (!window.productsCollection) {
-            throw new Error('Firebase no está disponible');
+        const response = await fetch('products.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        // Usar Firebase v9+ (modular)
-        const { getDocs } = window.Firebase;
-        const snapshot = await getDocs(window.productsCollection);
+        const data = await response.json();
+        products = data.productos || [];
         
-        products = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                name: data.Nombre || data.name || 'Sin nombre',
-                description: data.Descripcion || data.description || 'Sin descripción',
-                price: data.Precio || data.price || 0,
-                category: data.Tipo || data.category || 'Sin categoría',
-                brand: data.Marca || data.brand || 'Sin marca',
-                image: data.ruta_imagen || data.image || '💊'
-            };
-        });
+        // Mapear los campos en español a los campos que espera la aplicación
+        products = products.map((product, index) => ({
+            id: (index + 1).toString(),
+            name: product.nombre || 'Sin nombre',
+            description: product.descripcion || 'Sin descripción',
+            price: product.precio || 0,
+            category: product.categoria || 'Sin categoría',
+            brand: product.marca || 'Sin marca',
+            image: product.imagen || '💊'
+        }));
         
         console.log(`✅ Productos cargados exitosamente: ${products.length}`);
         displayProducts(products);
@@ -38,19 +41,11 @@ async function loadProductsFromFirebase() {
         if (products.length > 0) {
             console.log('📦 Productos disponibles:', products.map(p => p.name));
         } else {
-            console.log('⚠️ No se encontraron productos en la base de datos');
+            console.log('⚠️ No se encontraron productos en el JSON');
         }
         
     } catch (error) {
-        console.error('❌ Error al cargar productos desde Firebase:', error);
-        
-        // Mostrar información detallada del error
-        if (error.code) {
-            console.error(`Código de error: ${error.code}`);
-        }
-        if (error.message) {
-            console.error(`Mensaje: ${error.message}`);
-        }
+        console.error('❌ Error al cargar productos desde JSON:', error);
         
         // Cargar productos de ejemplo como fallback
         console.log('🔄 Cargando productos de ejemplo como fallback...');
@@ -62,7 +57,7 @@ async function loadProductsFromFirebase() {
 function loadExampleProducts() {
     products = [
         {
-            id: 1,
+            id: "1",
             name: "Paracetamol 500mg",
             description: "Analgésico y antipirético para aliviar el dolor y reducir la fiebre",
             price: 5.99,
@@ -71,7 +66,7 @@ function loadExampleProducts() {
             image: "💊"
         },
         {
-            id: 2,
+            id: "2",
             name: "Ibuprofeno 400mg",
             description: "Antiinflamatorio no esteroideo para aliviar el dolor y la inflamación",
             price: 6.50,
@@ -80,7 +75,7 @@ function loadExampleProducts() {
             image: "💊"
         },
         {
-            id: 3,
+            id: "3",
             name: "Vitamina C 1000mg",
             description: "Suplemento vitamínico para fortalecer el sistema inmunológico",
             price: 12.99,
@@ -90,48 +85,6 @@ function loadExampleProducts() {
         }
     ];
     displayProducts(products);
-}
-
-// Carrito de compras
-let cart = [];
-
-// Elementos del DOM (se inicializarán cuando se cargue la página)
-let productsGrid, cartSidebar, cartOverlay, cartItems, cartCount, cartTotal;
-let searchInput, categoryFilter, sortFilter, priceRange, priceValue;
-let filtersSidebar, filtersOverlay, backToTopBtn;
-
-// Función para esperar a que Firebase esté disponible
-async function waitForFirebase() {
-    try {
-        console.log('🔄 Esperando a que Firebase esté disponible...');
-        
-        // Usar la función de espera de Firebase
-        if (window.waitForFirebaseReady) {
-            await window.waitForFirebaseReady();
-            console.log('✅ Firebase está disponible, cargando productos...');
-            await loadProductsFromFirebase();
-        } else {
-            // Fallback: esperar manualmente
-            let attempts = 0;
-            const maxAttempts = 100; // 10 segundos máximo
-            
-            while (!window.productsCollection && attempts < maxAttempts) {
-                console.log(`🔄 Esperando Firebase... (${attempts + 1}/${maxAttempts})`);
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
-            }
-            
-            if (window.productsCollection) {
-                console.log('✅ Firebase disponible, cargando productos...');
-                await loadProductsFromFirebase();
-            } else {
-                throw new Error('Firebase no disponible después de 10 segundos');
-            }
-        }
-    } catch (error) {
-        console.error('❌ Error esperando Firebase:', error);
-        loadExampleProducts();
-    }
 }
 
 // Inicializar la página
@@ -152,8 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
     filtersOverlay = document.getElementById('filtersOverlay');
     backToTopBtn = document.getElementById('backToTop');
     
-    // Cargar productos desde Firebase
-    waitForFirebase();
+    // Cargar productos desde JSON
+    loadProductsFromJSON();
     
     // Cargar carrito desde localStorage
     loadCartFromStorage();
@@ -313,7 +266,10 @@ function getCategoryDisplayName(category) {
         'medicamentos': 'Medicamentos',
         'cuidado-personal': 'Cuidado Personal',
         'vitaminas': 'Vitaminas',
-        'dermatologia': 'Dermatología'
+        'dermatologia': 'Dermatología',
+        'Contorno de ojos': 'Contorno de Ojos',
+        'Antiestrés': 'Antiestrés',
+        'Cuidado Personal': 'Cuidado Personal'
     };
     return categoryNames[category] || category;
 }
@@ -454,11 +410,11 @@ function updateCartDisplay() {
                     <div class="cart-item-price">€${item.price.toFixed(2)}</div>
                 </div>
                 <div class="cart-item-quantity">
-                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)" aria-label="Reducir cantidad de ${item.name}">-</button>
+                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)" aria-label="Reducir cantidad de ${item.name}">-</button>
                     <span>${item.quantity}</span>
-                    <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)" aria-label="Aumentar cantidad de ${item.name}">+</button>
+                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)" aria-label="Aumentar cantidad de ${item.name}">+</button>
                 </div>
-                <button class="quantity-btn" onclick="removeFromCart(${item.id})" style="background: #ff4757; color: white;" aria-label="Eliminar ${item.name} del carrito">
+                <button class="quantity-btn" onclick="removeFromCart('${item.id}')" style="background: #ff4757; color: white;" aria-label="Eliminar ${item.name} del carrito">
                     <i class="fas fa-trash"></i>
                 </button>
             `;

@@ -223,6 +223,8 @@
                     <option value="cuidado-personal">Cuidado Personal</option>
                     <option value="vitaminas">Vitaminas</option>
                     <option value="dermatologia">Dermatología</option>
+                    <option value="Contorno de ojos">Contorno de Ojos</option>
+                    <option value="Antiestrés">Antiestrés</option>
                 </select>
             </div>
             
@@ -316,90 +318,7 @@
         <i class="fas fa-arrow-up" aria-hidden="true"></i>
     </button>
 
-    <script src="config.js"></script>
-    
-    <!-- Firebase SDK v9+ (modular) - Configuración directa -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDnGAwyCaGqSxhDX8woS9nbR-1kGc5D360",
-            authDomain: "farmacia-9737f.firebaseapp.com",
-            projectId: "farmacia-9737f",
-            storageBucket: "farmacia-9737f.firebasestorage.app",
-            messagingSenderId: "265524327894",
-            appId: "1:265524327894:web:2b8f935db21ddf24362077",
-            measurementId: "G-T5V39CTSDF"
-        };
-
-        // Inicializar Firebase
-        let app, db, productsCollection;
-
-        async function initializeFirebase() {
-            try {
-                console.log('🔄 Inicializando Firebase...');
-                
-                app = initializeApp(firebaseConfig);
-                console.log('✅ Firebase app inicializado:', app.name);
-                
-                // Configurar Firestore con la base de datos 'farmacia'
-                db = getFirestore(app, 'farmacia');
-                console.log('✅ Firestore inicializado con base de datos "farmacia"');
-                
-                // Configurar colección de productos
-                productsCollection = collection(db, 'productos');
-                console.log('✅ Colección de productos configurada');
-                
-                // Exportar para usar en otros archivos
-                window.db = db;
-                window.productsCollection = productsCollection;
-                window.firebaseApp = app;
-                window.isFirebaseReady = true;
-                
-                console.log('✅ Firebase configurado completamente');
-                
-                // Disparar evento personalizado para notificar que Firebase está listo
-                window.dispatchEvent(new CustomEvent('firebaseReady'));
-                
-                return true;
-                
-            } catch (error) {
-                console.error('❌ Error al inicializar Firebase:', error);
-                window.isFirebaseReady = false;
-                return false;
-            }
-        }
-
-        // Función para esperar a que Firebase esté listo
-        function waitForFirebaseReady() {
-            return new Promise((resolve) => {
-                if (window.isFirebaseReady) {
-                    resolve();
-                } else {
-                    window.addEventListener('firebaseReady', resolve, { once: true });
-                }
-            });
-        }
-
-        // Exportar funciones para uso global
-        window.initializeFirebase = initializeFirebase;
-        window.waitForFirebaseReady = waitForFirebaseReady;
-        window.Firebase = { initializeApp, getFirestore, collection, getDocs, doc, getDoc, query, orderBy, onSnapshot, getAuth, signInAnonymously };
-
-        // Inicializar Firebase cuando se cargue la página
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔄 DOM cargado, iniciando Firebase...');
-            initializeFirebase();
-        });
-    </script>
-    
     <!-- Script principal -->
     <script src="script.js"></script>
-    
-    <!-- Script de migración de productos -->
-    <script src="migrate-products.js"></script>
 </body>
 </html>
