@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["http://localhost:8000", "http://127.0.0.1:8000", "https://farmacia-9737f.web.app", "https://farmacia-9737f.firebaseapp.com"],
+    "method": ["GET", "HEAD"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"]
+  }
+]

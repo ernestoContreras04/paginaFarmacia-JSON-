@@ -9,12 +9,13 @@ let productsGrid, cartSidebar, cartOverlay, cartItems, cartCount, cartTotal;
 let searchInput, categoryFilter, sortFilter, priceRange, priceValue;
 let filtersSidebar, filtersOverlay, backToTopBtn;
 
-// Función para cargar productos desde JSON
+// Función para cargar productos desde Firebase Storage (usando proxy local)
 async function loadProductsFromJSON() {
     try {
-        console.log('🔄 Cargando productos desde JSON...');
+        console.log('🔄 Cargando productos desde Firebase Storage...');
         
-        const response = await fetch('products.json');
+        // Usar el proxy local para evitar problemas de CORS
+        const response = await fetch('/products.json');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -33,7 +34,7 @@ async function loadProductsFromJSON() {
             image: product.imagen || '💊'
         }));
         
-        console.log(`✅ Productos cargados exitosamente: ${products.length}`);
+        console.log(`✅ Productos cargados exitosamente desde Firebase Storage: ${products.length}`);
         displayProducts(products);
         updateCartCount();
         
@@ -45,7 +46,7 @@ async function loadProductsFromJSON() {
         }
         
     } catch (error) {
-        console.error('❌ Error al cargar productos desde JSON:', error);
+        console.error('❌ Error al cargar productos desde Firebase Storage:', error);
         
         // Cargar productos de ejemplo como fallback
         console.log('🔄 Cargando productos de ejemplo como fallback...');
