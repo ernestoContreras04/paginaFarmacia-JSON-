@@ -14,8 +14,8 @@ async function loadProductsFromJSON() {
     try {
         console.log('🔄 Cargando productos desde Firebase Storage...');
         
-        // URL del archivo JSON a través del proxy local
-        const firebaseStorageURL = '/products.json';
+        // URL de la API de Vercel que actúa como proxy
+        const firebaseStorageURL = '/api/products';
         
         console.log('📁 Cargando desde:', firebaseStorageURL);
         
