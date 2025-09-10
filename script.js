@@ -9,13 +9,18 @@ let productsGrid, cartSidebar, cartOverlay, cartItems, cartCount, cartTotal;
 let searchInput, categoryFilter, sortFilter, priceRange, priceValue;
 let filtersSidebar, filtersOverlay, backToTopBtn;
 
-// Función para cargar productos desde Firebase Storage (usando proxy local)
+// Función para cargar productos desde Firebase Storage
 async function loadProductsFromJSON() {
     try {
         console.log('🔄 Cargando productos desde Firebase Storage...');
         
-        // Usar el proxy local para evitar problemas de CORS
-        const response = await fetch('/products.json');
+        // URL del archivo JSON a través del proxy local
+        const firebaseStorageURL = '/products.json';
+        
+        console.log('📁 Cargando desde:', firebaseStorageURL);
+        
+        // Descargar el contenido del JSON directamente desde Firebase Storage
+        const response = await fetch(firebaseStorageURL);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

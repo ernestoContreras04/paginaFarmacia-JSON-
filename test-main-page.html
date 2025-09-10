@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Página Principal - Farmacia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .test-result {
+            margin: 5px 0;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        .test-pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .test-info {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .iframe-container {
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Página Principal - Farmacia</h1>
+        <p>Este test verifica que la página principal de la farmacia funcione correctamente con el proxy.</p>
+        
+        <div id="status" class="status loading">
+            ⏳ Iniciando tests...
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">🔗 Test de Conectividad</div>
+            <div id="connectivityTest" class="test-result test-info">⏳ Probando...</div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">📦 Test de Carga de Productos</div>
+            <div id="productsTest" class="test-result test-info">⏳ Probando...</div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">🎨 Test de Interfaz</div>
+            <div id="interfaceTest" class="test-result test-info">⏳ Probando...</div>
+        </div>
+        
+        <div>
+            <button onclick="runAllTests()">🔄 Ejecutar Todos los Tests</button>
+            <button onclick="openMainPage()">🌐 Abrir Página Principal</button>
+            <button onclick="clearResults()">🗑️ Limpiar</button>
+        </div>
+        
+        <div class="iframe-container">
+            <h3>📱 Vista Previa de la Página Principal</h3>
+            <iframe id="mainPageFrame" src="http://localhost:8000/" title="Página Principal de la Farmacia"></iframe>
+        </div>
+    </div>
+
+    <script>
+        async function testConnectivity() {
+            const testDiv = document.getElementById('connectivityTest');
+            
+            try {
+                const response = await fetch('http://localhost:8000/');
+                if (response.ok) {
+                    testDiv.className = 'test-result test-pass';
+                    testDiv.innerHTML = '✅ Página principal accesible (Status: ' + response.status + ')';
+                    return true;
+                } else {
+                    testDiv.className = 'test-result test-fail';
+                    testDiv.innerHTML = '❌ Error HTTP: ' + response.status;
+                    return false;
+                }
+            } catch (error) {
+                testDiv.className = 'test-result test-fail';
+                testDiv.innerHTML = '❌ Error de conectividad: ' + error.message;
+                return false;
+            }
+        }
+        
+        async function testProductsLoading() {
+            const testDiv = document.getElementById('productsTest');
+            
+            try {
+                const response = await fetch('http://localhost:8000/products.json');
+                if (!response.ok) {
+                    throw new Error('HTTP error: ' + response.status);
+                }
+                
+                const data = await response.json();
+                const products = data.productos || [];
+                
+                if (products.length > 0) {
+                    testDiv.className = 'test-result test-pass';
+                    testDiv.innerHTML = `✅ Productos cargados: ${products.length} productos disponibles`;
+                    return true;
+                } else {
+                    testDiv.className = 'test-result test-fail';
+                    testDiv.innerHTML = '❌ No se encontraron productos en el JSON';
+                    return false;
+                }
+            } catch (error) {
+                testDiv.className = 'test-result test-fail';
+                testDiv.innerHTML = '❌ Error al cargar productos: ' + error.message;
+                return false;
+            }
+        }
+        
+        async function testInterface() {
+            const testDiv = document.getElementById('interfaceTest');
+            
+            try {
+                // Verificar que los archivos CSS y JS están disponibles
+                const cssResponse = await fetch('http://localhost:8000/styles.css');
+                const jsResponse = await fetch('http://localhost:8000/script.js');
+                
+                if (cssResponse.ok && jsResponse.ok) {
+                    testDiv.className = 'test-result test-pass';
+                    testDiv.innerHTML = '✅ Archivos CSS y JS disponibles';
+                    return true;
+                } else {
+                    testDiv.className = 'test-result test-fail';
+                    testDiv.innerHTML = '❌ Algunos archivos no están disponibles';
+                    return false;
+                }
+            } catch (error) {
+                testDiv.className = 'test-result test-fail';
+                testDiv.innerHTML = '❌ Error al verificar archivos: ' + error.message;
+                return false;
+            }
+        }
+        
+        async function runAllTests() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '🔄 Ejecutando todos los tests...';
+            
+            const connectivity = await testConnectivity();
+            const products = await testProductsLoading();
+            const interface = await testInterface();
+            
+            const allPassed = connectivity && products && interface;
+            
+            if (allPassed) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Todos los tests pasaron! La página principal debería funcionar correctamente.';
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Algunos tests fallaron. Revisa los detalles arriba.';
+            }
+        }
+        
+        function openMainPage() {
+            window.open('http://localhost:8000/', '_blank');
+        }
+        
+        function clearResults() {
+            document.getElementById('connectivityTest').className = 'test-result test-info';
+            document.getElementById('connectivityTest').innerHTML = '⏳ Probando...';
+            document.getElementById('productsTest').className = 'test-result test-info';
+            document.getElementById('productsTest').innerHTML = '⏳ Probando...';
+            document.getElementById('interfaceTest').className = 'test-result test-info';
+            document.getElementById('interfaceTest').innerHTML = '⏳ Probando...';
+            document.getElementById('status').className = 'status info';
+            document.getElementById('status').innerHTML = 'ℹ️ Listo para ejecutar tests';
+        }
+        
+        // Ejecutar tests automáticamente al cargar la página
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Firebase Storage - Carga de JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .product-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .product-price {
+            color: #e74c3c;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .product-category {
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 4px solid #007bff;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .json-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Firebase Storage - Carga de JSON</h1>
+        <p>Este archivo de test verifica que se puede cargar correctamente el archivo JSON desde Firebase Storage.</p>
+        
+        <div id="status" class="status loading">
+            ⏳ Iniciando test...
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalProducts">0</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">0</div>
+                <div class="stat-label">Categorías</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalBrands">0</div>
+                <div class="stat-label">Marcas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgPrice">€0</div>
+                <div class="stat-label">Precio Promedio</div>
+            </div>
+        </div>
+        
+        <div>
+            <button onclick="testFirebaseStorage()">🔄 Ejecutar Test</button>
+            <button onclick="showRawJSON()">📄 Ver JSON Completo</button>
+            <button onclick="showProducts()">📦 Ver Productos</button>
+            <button onclick="clearResults()">🗑️ Limpiar</button>
+        </div>
+        
+        <div id="results"></div>
+        <div id="jsonDisplay" class="json-display" style="display: none;"></div>
+    </div>
+
+    <script>
+        let loadedData = null;
+        
+        async function testFirebaseStorage() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            const statsDiv = document.getElementById('stats');
+            
+            try {
+                statusDiv.className = 'status loading';
+                statusDiv.innerHTML = '⏳ Cargando datos desde Firebase Storage...';
+                
+                // URL del archivo JSON a través del proxy local
+                const firebaseStorageURL = '/products.json';
+                
+                console.log('🔄 Iniciando carga desde:', firebaseStorageURL);
+                
+                // Hacer la petición al JSON
+                const response = await fetch(firebaseStorageURL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                loadedData = data;
+                
+                console.log('✅ Datos cargados exitosamente:', data);
+                
+                // Mostrar estadísticas
+                displayStats(data);
+                
+                // Mostrar algunos productos de ejemplo
+                displaySampleProducts(data);
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = `✅ Test exitoso! Se cargaron ${data.productos.length} productos desde Firebase Storage`;
+                
+                resultsDiv.innerHTML = `
+                    <h3>📊 Información del JSON:</h3>
+                    <ul>
+                        <li><strong>Fecha de generación:</strong> ${data.metadata.fecha_generacion}</li>
+                        <li><strong>Total de productos:</strong> ${data.metadata.total_productos}</li>
+                        <li><strong>Fuente:</strong> ${data.metadata.fuente}</li>
+                        <li><strong>Versión:</strong> ${data.metadata.version}</li>
+                    </ul>
+                `;
+                
+            } catch (error) {
+                console.error('❌ Error en el test:', error);
+                
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ Error al cargar datos: ${error.message}`;
+                
+                resultsDiv.innerHTML = `
+                    <h3>🚨 Error en el test:</h3>
+                    <p><strong>Mensaje:</strong> ${error.message}</p>
+                    <p><strong>Posibles causas:</strong></p>
+                    <ul>
+                        <li>Problemas de conectividad</li>
+                        <li>URL incorrecta del archivo JSON</li>
+                        <li>Permisos de acceso al archivo</li>
+                        <li>Problemas de CORS</li>
+                    </ul>
+                `;
+            }
+        }
+        
+        function displayStats(data) {
+            const products = data.productos || [];
+            
+            // Calcular estadísticas
+            const categories = [...new Set(products.map(p => p.categoria))];
+            const brands = [...new Set(products.map(p => p.marca))];
+            const avgPrice = products.reduce((sum, p) => sum + (p.precio || 0), 0) / products.length;
+            
+            // Actualizar estadísticas
+            document.getElementById('totalProducts').textContent = products.length;
+            document.getElementById('totalCategories').textContent = categories.length;
+            document.getElementById('totalBrands').textContent = brands.length;
+            document.getElementById('avgPrice').textContent = `€${avgPrice.toFixed(2)}`;
+            
+            // Mostrar estadísticas
+            document.getElementById('stats').style.display = 'grid';
+        }
+        
+        function displaySampleProducts(data) {
+            const products = data.productos || [];
+            const sampleProducts = products.slice(0, 5); // Mostrar solo los primeros 5
+            
+            let productsHTML = '<h3>📦 Productos de ejemplo (primeros 5):</h3>';
+            
+            sampleProducts.forEach((product, index) => {
+                productsHTML += `
+                    <div class="product-card">
+                        <div class="product-name">${index + 1}. ${product.nombre}</div>
+                        <div class="product-category">${product.categoria}</div>
+                        <div><strong>Marca:</strong> ${product.marca}</div>
+                        <div class="product-price">€${product.precio}</div>
+                        <div><strong>Descripción:</strong> ${product.descripcion.substring(0, 100)}...</div>
+                        <div><strong>Imagen:</strong> ${product.imagen ? '✅ Disponible' : '❌ No disponible'}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('results').innerHTML += productsHTML;
+        }
+        
+        function showRawJSON() {
+            if (!loadedData) {
+                alert('Primero ejecuta el test para cargar los datos');
+                return;
+            }
+            
+            const jsonDisplay = document.getElementById('jsonDisplay');
+            jsonDisplay.style.display = 'block';
+            jsonDisplay.textContent = JSON.stringify(loadedData, null, 2);
+        }
+        
+        function showProducts() {
+            if (!loadedData) {
+                alert('Primero ejecuta el test para cargar los datos');
+                return;
+            }
+            
+            const products = loadedData.productos || [];
+            let productsHTML = '<h3>📦 Todos los productos:</h3>';
+            
+            products.forEach((product, index) => {
+                productsHTML += `
+                    <div class="product-card">
+                        <div class="product-name">${index + 1}. ${product.nombre}</div>
+                        <div class="product-category">${product.categoria}</div>
+                        <div><strong>Marca:</strong> ${product.marca}</div>
+                        <div class="product-price">€${product.precio}</div>
+                        <div><strong>Descripción:</strong> ${product.descripcion}</div>
+                        <div><strong>Imagen:</strong> <a href="${product.imagen}" target="_blank">Ver imagen</a></div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('results').innerHTML = productsHTML;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('jsonDisplay').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('status').className = 'status info';
+            document.getElementById('status').innerHTML = 'ℹ️ Listo para ejecutar test';
+            loadedData = null;
+        }
+        
+        // Ejecutar test automáticamente al cargar la página
+        window.addEventListener('load', () => {
+            setTimeout(testFirebaseStorage, 1000);
+        });
+    </script>
+</body>
+</html>
